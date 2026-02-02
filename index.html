@@ -8,14 +8,6 @@
   <!-- Confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-  <!-- EmailJS -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <script>
-    (function () {
-      emailjs.init("5wi6Fy4rVQxqqS1AQ"); // 🔑 PUT YOUR PUBLIC KEY HERE
-    })();
-  </script>
-
   <style>
     :root {
       --bg1: #ffd6e7;
@@ -57,12 +49,6 @@
       box-shadow: 0 18px 60px rgba(0,0,0,.15);
     }
 
-    .art {
-      width: min(260px, 80vw);
-      margin: 0 auto 10px;
-      display: block;
-    }
-
     h1 {
       font-size: clamp(26px, 4vw, 44px);
       margin: 12px 0 18px;
@@ -86,6 +72,7 @@
       border: none;
       cursor: pointer;
       box-shadow: 0 10px 24px rgba(0,0,0,.14);
+      user-select: none;
     }
 
     #yesBtn {
@@ -109,6 +96,12 @@
     .result {
       display: none;
       margin-top: 18px;
+      animation: pop .35s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -132,6 +125,7 @@
       <img
         src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
         width="300"
+        alt="Celebration"
       />
     </section>
   </main>
@@ -143,22 +137,20 @@
     const result = document.getElementById("result");
     const hint = document.getElementById("hint");
 
-    /* ---------- EMAIL NOTIFICATION ---------- */
-    function sendYesNotification() {
-      emailjs.send(
-        "service_r55dsrh",   // 📨 PUT SERVICE ID
-        "template_yju821o",  // 📄 PUT TEMPLATE ID
-        {
-          message: "💘 Dhriti just said YES!",
-          time: new Date().toLocaleString()
-        }
-      )
-      .then(() => {
-        console.log("Email sent successfully 💌");
-      })
-      .catch(err => {
-        console.error("Email failed ❌", err);
-      });
+    /* ---------- TELEGRAM NOTIFICATION ---------- */
+    function sendTelegramNotification() {
+      const BOT_TOKEN = "8449598363:AAH_e2XRUdxl8RMPxg9HFYM3s8CrjnXgPY4"; // 🔑 REQUIRED
+      const CHAT_ID = "5958925399"; // ✅ YOUR CHAT ID
+
+      const message = encodeURIComponent(
+        "💘 VALENTINE ALERT 💘\n\n" +
+        "Dhriti just said YES 🥰\n\n" +
+        "⏰ Time: " + new Date().toLocaleString()
+      );
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${message}`)
+        .then(() => console.log("Telegram notification sent 💌"))
+        .catch(err => console.error("Telegram failed ❌", err));
     }
 
     /* ---------- CONFETTI ---------- */
@@ -174,14 +166,14 @@
       });
     }
 
-    /* ---------- NO BUTTON RUN ---------- */
+    /* ---------- NO BUTTON RUNS AWAY ---------- */
     zone.addEventListener("pointermove", e => {
       const rect = zone.getBoundingClientRect();
       const btn = noBtn.getBoundingClientRect();
 
       if (Math.hypot(
-        btn.left - e.clientX,
-        btn.top - e.clientY
+        (btn.left + btn.width / 2) - e.clientX,
+        (btn.top + btn.height / 2) - e.clientY
       ) < 120) {
         noBtn.style.left = Math.random() * (rect.width - btn.width) + "px";
         noBtn.style.top = Math.random() * (rect.height - btn.height) + "px";
@@ -190,7 +182,7 @@
 
     /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
-      sendYesNotification();   // 🔔 EMAIL TRIGGER
+      sendTelegramNotification();   // 📲 INSTANT TELEGRAM MESSAGE
       zone.style.display = "none";
       hint.style.display = "none";
       result.style.display = "block";
@@ -199,4 +191,3 @@
   </script>
 </body>
 </html>
-
